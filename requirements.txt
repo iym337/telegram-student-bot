@@ -2,4 +2,4 @@ openpyxl
 matplotlib
 python-telegram-bot
 flask
-
+gunicorn

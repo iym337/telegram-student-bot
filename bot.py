@@ -4,13 +4,10 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 
-# رابط ngrok الخاص بك
-NGROK_URL = "https://fdf4-185-208-102-51.ngrok-free.app/"  # استبدل بالرابط الخاص بك
-
 # قراءة بيانات الطالب من ملف Excel بناءً على ورقته
 def get_student_grades(student_id):
     # تحميل ملف Excel باستخدام المسار الكامل
-    file_path = "C:/Users/NOUR-ALSHAM/OneDrive/Desktop/my bot/students_grades.xlsx"  # استبدل هذا بالمسار الفعلي لملفك
+    file_path = "students_grades.xlsx"  # تأكد من أن الملف في نفس مجلد المشروع أو قدم المسار الكامل
     wb = openpyxl.load_workbook(file_path)
     
     # التحقق إذا كانت ورقة الطالب موجودة
@@ -57,9 +54,6 @@ async def show_grades(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         # إرسال الرسالة مع الرسم البياني
         await update.message.reply_text(f"معدل الطالب {student_id}: {average_grade:.2f}")
         await update.message.reply_photo(photo=open('grades_and_homework_chart.png', 'rb'))
-        
-        # إرسال رابط ngrok مع النتائج
-        await update.message.reply_text(f"يمكنك الوصول إلى رابط الخدمة عبر ngrok من هنا: {NGROK_URL}")
     else:
         await update.message.reply_text(f"لم يتم العثور على درجات للطالب {student_id}.")
 

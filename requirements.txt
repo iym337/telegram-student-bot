@@ -1,5 +1,5 @@
-openpyxl
-matplotlib
-python-telegram-bot
-flask
-gunicorn
+openpyxl==3.1.2
+matplotlib==3.7.1
+python-telegram-bot==20.0
+flask==2.2.3
+waitress==2.1.1

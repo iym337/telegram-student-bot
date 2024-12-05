@@ -2,12 +2,19 @@ import openpyxl
 import matplotlib.pyplot as plt
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+from flask import Flask, request
 import os
+
+# رابط السيرفر على Render مع المسار
+NGROK_URL = "https://telegram-student-bot-li3t.onrender.com/webhook"  # استبدل بالرابط الفعلي من Render
+
+# إعداد Flask
+app = Flask(__name__)
 
 # قراءة بيانات الطالب من ملف Excel بناءً على ورقته
 def get_student_grades(student_id):
     # تحميل ملف Excel باستخدام المسار الكامل
-    file_path = "students_grades.xlsx"  # تأكد من أن الملف في نفس مجلد المشروع أو قدم المسار الكامل
+    file_path = "C:/Users/NOUR-ALSHAM/OneDrive/Desktop/my bot/students_grades.xlsx"  # استبدل هذا بالمسار الفعلي لملفك
     wb = openpyxl.load_workbook(file_path)
     
     # التحقق إذا كانت ورقة الطالب موجودة
@@ -54,16 +61,31 @@ async def show_grades(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         # إرسال الرسالة مع الرسم البياني
         await update.message.reply_text(f"معدل الطالب {student_id}: {average_grade:.2f}")
         await update.message.reply_photo(photo=open('grades_and_homework_chart.png', 'rb'))
+        
+        # إرسال رابط السيرفر مع النتائج
+        await update.message.reply_text(f"يمكنك الوصول إلى رابط الخدمة عبر السيرفر من هنا: {NGROK_URL}")
     else:
         await update.message.reply_text(f"لم يتم العثور على درجات للطالب {student_id}.")
 
 # إعداد البوت
 def main():
-    # إضافة التوكن هنا
-    application = Application.builder().token("8048197051:AAHvIPxu_OtD5G66CgVmJBai4mjFOqDw-cc").build()  # التوكن هنا
+    application = Application.builder().token("8048197051:AAHvIPxu_OtD5G66CgVmJBai4mjFOqDw-cc").build()  # استبدل بـ التوكن الخاص بك
     application.add_handler(CommandHandler("grades", show_grades))  # عرض الدرجات مع علامات أوراق العمل
 
-    application.run_polling()
+    # إعداد webhook
+    application.bot.set_webhook(url=NGROK_URL)  # رابط السيرفر + المسار
+
+    # تشغيل البوت باستخدام webhook
+    application.run_webhook(listen="0.0.0.0", port=5000, url_path="webhook")  # المسار هنا هو "webhook"
+
+# إعداد Flask لاستقبال التحديثات
+@app.route("/webhook", methods=["POST"])  # المسار هنا هو "webhook"
+def webhook():
+    json_str = request.get_data().decode("UTF-8")
+    update = Update.de_json(json_str, application.bot)
+    application.process_update(update)
+    return "OK"
 
 if __name__ == '__main__':
-    main()
+    # تشغيل Flask
+    app.run(debug=True, host='0.0.0.0', port=5000)
